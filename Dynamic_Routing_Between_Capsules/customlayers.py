@@ -1,5 +1,6 @@
 from keras import backend as K
 from keras.engine.topology import Layer, initializers
+from keras.utils import to_categorical
 import tensorflow as tf
 
 
@@ -64,6 +65,20 @@ class Length(Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape[:-1]
+
+
+class Mask(Layer):
+    def call(self, inputs, **kwargs):
+        assert type(inputs) is list and len(inputs) == 2
+        inputs, mask = inputs
+        # inputs size: [None, num_capsule, dim_capsule]
+        # mask size: [None, num_capsule]
+        # masked size: [None, num_capsule * dim_capsule]
+        masked = K.batch_flatten(inputs * K.expand_dims(mask, -1))
+        return masked
+
+    def compute_output_shape(self, input_shape):
+        return tuple([None, input_shape[0][1] * input_shape[0][2]])
 
 
 def squash(s, axis=-1):

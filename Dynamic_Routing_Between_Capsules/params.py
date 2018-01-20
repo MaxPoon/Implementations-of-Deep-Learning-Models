@@ -23,3 +23,6 @@ digits_capsules_params = {
     'dim_capsule': 16,
     'routing_iterations': 3
 }
+dense1, dense2 = 512, 1024
+margin_loss_lambda = 0.5
+reconstruction_loss_coefficient = 0.0005
