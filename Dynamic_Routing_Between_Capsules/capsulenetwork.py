@@ -1,7 +1,6 @@
-from keras import backend as K
 from keras.utils import to_categorical
 from keras.datasets import mnist
-from keras import layers, models, optimizers
+from keras import layers, models
 from params import *
 from customlayers import *
 
