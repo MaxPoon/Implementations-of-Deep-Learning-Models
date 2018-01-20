@@ -37,6 +37,7 @@ class Capsule(Layer):
         # tf matrix production, keras.dot doesn't work here
         caps_predicted = W_tiled @ prev_capsule_tiled
         caps_predicted = K.squeeze(caps_predicted, -1)  # [batch_size, input_num_capsule, num_capsule, dim_capsule]
+        # the extra dimension of b is for broadcasting
         b = tf.zeros(shape=(batch_size, self.input_num_capsule, self.num_capsule, 1))
         for i in range(self.routing_iterations):
             c = tf.nn.softmax(b, dim=2)  # keras softmax doesn't work here
@@ -48,11 +49,8 @@ class Capsule(Layer):
                 break
             output_tiled = K.tile(output, [1, self.input_num_capsule, 1, 1])
             # output size: [batch_size, input_num_capsule, num_capsule, dim_capsule]
-            output_flattened = K.reshape(output_tiled, [-1, self.dim_capsule])
-            caps_predicted_flattened = K.reshape(caps_predicted, [-1, self.dim_capsule])
-            agreement = K.reshape(
-                K.sum(output_flattened * caps_predicted_flattened, axis=-1),
-                [batch_size, self.input_num_capsule, self.num_capsule, 1])
+            agreement = K.sum(output_tiled * caps_predicted, axis=-1)
+            agreement = K.expand_dims(agreement, -1)  # make the number of dimensions equal to b.dim
             b += agreement
         return K.squeeze(output, 1)
 
